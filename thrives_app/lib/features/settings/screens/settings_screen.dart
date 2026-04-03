@@ -202,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
                   const _AdvisorCard(
-                    name: 'Marit Tandberg',
+                    name: 'Marit Leito',
                     role: 'Psychologist · Clinical Advisor',
                     detail:
                         'Window of Tolerance architecture · trauma-informed '

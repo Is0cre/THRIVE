@@ -18,7 +18,7 @@ import '../../../core/widgets/emergency_button.dart';
 //   hypoarousal, and regulated states.
 // What happens if removed or modified: A fast, accessible tool for acute
 //   distress is lost. The panic button uses the same mechanism for this reason.
-// Informed by: Marit Tandberg, clinical advisor / Balban et al. (2023),
+// Informed by: Marit Leito, clinical advisor / Balban et al. (2023),
 //   "Brief structured respiration practices enhance mood and reduce physiological
 //   arousal" — Cell Reports Medicine / Huberman Lab.
 

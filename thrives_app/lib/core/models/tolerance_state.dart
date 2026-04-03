@@ -7,7 +7,7 @@
 // What happens if removed or modified: Users in hyperaroused or hypoaroused
 //   states may access tools that are contraindicated for their current state,
 //   increasing risk of deepened dysregulation or retraumatisation.
-// Informed by: Marit Tandberg, clinical advisor / Ogden et al., sensorimotor
+// Informed by: Marit Leito, clinical advisor / Ogden et al., sensorimotor
 //   psychotherapy / Siegel, Window of Tolerance model.
 
 enum ToleranceState { hyperaroused, regulated, hypoaroused }
@@ -23,7 +23,7 @@ extension ToleranceStateGating on ToleranceState {
   //   deepens dissociation and freeze.
   // What happens if removed: Contraindicated technique becomes available in
   //   states where it causes harm.
-  // Informed by: Marit Tandberg, clinical advisor.
+  // Informed by: Marit Leito, clinical advisor.
   bool get can4_7_8 => this == ToleranceState.regulated;
 
   // CLINICAL SAFETY — Wim Hof lock
@@ -32,7 +32,7 @@ extension ToleranceStateGating on ToleranceState {
   //   system is dangerous. Can cause fainting, panic escalation, or cardiac
   //   stress. Even when regulated, requires full contraindication screen.
   // What happens if removed: Serious physical harm is a real possibility.
-  // Informed by: Marit Tandberg, clinical advisor / published Wim Hof safety
+  // Informed by: Marit Leito, clinical advisor / published Wim Hof safety
   //   literature.
   bool get canWimHof => this == ToleranceState.regulated;
 
@@ -43,7 +43,7 @@ extension ToleranceStateGating on ToleranceState {
   //   is not available. Attempting it can increase frustration and distress.
   // What happens if removed: Users attempt a technique they cannot access,
   //   increasing distress.
-  // Informed by: Marit Tandberg, clinical advisor.
+  // Informed by: Marit Leito, clinical advisor.
   bool get canSafePlace => this == ToleranceState.regulated;
 
   // CLINICAL SAFETY — Bilateral stimulation lock
@@ -54,7 +54,7 @@ extension ToleranceStateGating on ToleranceState {
   //   distress or triggering retraumatisation.
   // What happens if removed: Risk of retraumatisation for users in acute
   //   dysregulated states.
-  // Informed by: Marit Tandberg, clinical advisor / Francine Shapiro,
+  // Informed by: Marit Leito, clinical advisor / Francine Shapiro,
   //   EMDR preparation phase requirements.
   bool get canBilateral => this == ToleranceState.regulated;
 

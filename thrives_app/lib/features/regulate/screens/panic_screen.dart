@@ -16,7 +16,7 @@ import '../../../core/widgets/main_shell.dart';
 //   nerve. Three cycles is enough to produce measurable HRV change.
 // What happens if removed or modified: Person in crisis is left navigating
 //   a menu system when they cannot think. This is a failure mode.
-// Informed by: Marit Tandberg, clinical advisor / Huberman Lab physiological
+// Informed by: Marit Leito, clinical advisor / Huberman Lab physiological
 //   sigh research (Balban et al., 2023) / Porges, Polyvagal Theory.
 
 enum _Phase { inhale1, inhale2, exhale, between }

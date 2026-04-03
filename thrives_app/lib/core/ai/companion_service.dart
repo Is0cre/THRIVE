@@ -21,7 +21,7 @@ import 'package:flutter_gemma/flutter_gemma.dart';
 //   6. If the model emits anything resembling clinical advice, the response
 //      is intercepted and replaced (see _sanitise()).
 //
-// Scope review: Marit Tandberg, Psychologist, June 2026.
+// Scope review: Marit Leito, Psychologist, June 2026.
 // Before expanding capabilities (longer responses, diagnosis-adjacent features,
 // crisis triage, memory across sessions) — get clinical sign-off first.
 

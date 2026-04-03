@@ -19,7 +19,7 @@ class ProcessHomeScreen extends StatelessWidget {
         //   retraumatisation. See tolerance_state.dart for full reasoning.
         // What happens if removed: Users in acute states access processing tools
         //   that require regulation as a prerequisite.
-        // Informed by: Marit Tandberg, clinical advisor.
+        // Informed by: Marit Leito, clinical advisor.
         final bilateralLocked = wot != null && !wot.canBilateral;
         final lockedReason = wot?.lockedReason ?? '';
 

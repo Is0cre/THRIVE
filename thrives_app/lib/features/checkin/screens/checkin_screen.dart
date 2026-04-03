@@ -13,7 +13,7 @@ import '../../../core/theme/app_theme.dart';
 //   it routes the user to what is safe and appropriate for their current state.
 // What happens if removed or modified: Users in acute dysregulated states may
 //   access tools that are contraindicated, increasing risk of harm.
-// Informed by: Marit Tandberg, clinical advisor / Siegel, Window of Tolerance.
+// Informed by: Marit Leito, clinical advisor / Siegel, Window of Tolerance.
 
 class CheckInScreen extends StatefulWidget {
   final void Function(ToleranceState state) onComplete;

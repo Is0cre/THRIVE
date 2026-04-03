@@ -190,7 +190,7 @@ Every safety-critical function must include a comment block with:
 // What this does: [plain description]
 // Why it exists: [clinical reasoning]
 // What happens if removed or modified: [consequence]
-// Informed by: [source — Marit Tandberg, clinical advisor / published protocol / etc]
+// Informed by: [source — Marit Leito, clinical advisor / published protocol / etc]
 ```
 
 This is an open source project. Contributors and forkers must understand
@@ -246,7 +246,7 @@ Build accordingly.
 
 ## CLINICAL ADVISOR
 
-Marit Tandberg — practicing psychologist.
+Marit Leito — practicing psychologist.
 Her input shapes the safety architecture, tool routing, and progression system.
 When in doubt about clinical decisions, flag for her review.
 Do not make clinical judgment calls without flagging them first.

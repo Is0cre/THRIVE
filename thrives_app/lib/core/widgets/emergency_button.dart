@@ -11,7 +11,7 @@ import '../../features/regulate/screens/panic_screen.dart';
 //   works from any screen regardless of navigation stack depth.
 // What happens if removed: Person in crisis has no immediate intervention
 //   available.
-// Informed by: Marit Tandberg, clinical advisor.
+// Informed by: Marit Leito, clinical advisor.
 
 class EmergencyButton extends StatelessWidget {
   const EmergencyButton({super.key});
