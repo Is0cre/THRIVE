@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/tolerance_state.dart';
 import '../../../core/state/wot_scope.dart';
+import '../../../core/storage/hrv_service.dart';
 import '../../../core/storage/prefs_service.dart';
 import '../../../core/storage/session_log.dart';
 import '../../../core/storage/tier_service.dart';
 import '../../../core/theme/app_theme.dart';
+import 'hrv_screen.dart';
 
 class MonitorHomeScreen extends StatefulWidget {
   const MonitorHomeScreen({super.key});
@@ -16,6 +18,7 @@ class MonitorHomeScreen extends StatefulWidget {
 class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
   List<ToleranceEntry> _toleranceHistory = [];
   List<SessionEntry> _sessionHistory = [];
+  HrvReading? _lastHrv;
   bool _loading = true;
 
   @override
@@ -27,13 +30,25 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
   Future<void> _load() async {
     final t = await SessionLog.getToleranceLog();
     final s = await SessionLog.getSessionLog();
+    final hrv = await HrvService.load();
     if (mounted) {
       setState(() {
         _toleranceHistory = t;
         _sessionHistory = s;
+        _lastHrv = hrv.isNotEmpty ? hrv.first : null;
         _loading = false;
       });
     }
+  }
+
+  Future<void> _openHrv() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const HrvScreen()),
+    );
+    // Reload in case a new reading was saved
+    final hrv = await HrvService.load();
+    if (mounted) setState(() => _lastHrv = hrv.isNotEmpty ? hrv.first : null);
   }
 
   Future<void> _checkIn(ToleranceState state) async {
@@ -87,6 +102,13 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
                         padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
                         sliver: SliverList(
                           delegate: SliverChildListDelegate([
+                            // ── HRV card ───────────────────────────────────
+                            _HrvCard(
+                              last: _lastHrv,
+                              onTap: _openHrv,
+                            ),
+                            const SizedBox(height: 16),
+
                             // ── Window of tolerance diagram ────────────────
                             _WindowDiagram(current: wot),
                             const SizedBox(height: 24),
@@ -145,6 +167,70 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+// ─── HRV card ──────────────────────────────────────────────────────────────────
+
+class _HrvCard extends StatelessWidget {
+  final HrvReading? last;
+  final VoidCallback onTap;
+  const _HrvCard({required this.last, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.favorite_border_rounded,
+                color: AppColors.teal, size: 22),
+            const SizedBox(width: 14),
+            Expanded(
+              child: last == null
+                  ? const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Heart rate variability',
+                            style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400)),
+                        SizedBox(height: 2),
+                        Text('Tap to measure via camera',
+                            style: TextStyle(
+                                color: AppColors.textMuted, fontSize: 12)),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${last!.hr.round()} bpm  ·  RMSSD ${last!.rmssd.round()} ms',
+                          style: const TextStyle(
+                              color: AppColors.textPrimary, fontSize: 14),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          last!.rmssdLabel,
+                          style: const TextStyle(
+                              color: AppColors.textMuted, fontSize: 12),
+                        ),
+                      ],
+                    ),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textMuted, size: 18),
+          ],
+        ),
+      ),
     );
   }
 }
