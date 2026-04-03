@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/storage/tier_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/attune/screens/attune_home_screen.dart';
 import '../../features/build/screens/build_home_screen.dart';
@@ -8,6 +9,64 @@ import '../../features/reflect/screens/reflect_home_screen.dart';
 import '../../features/regulate/screens/regulate_home_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import 'emergency_button.dart';
+
+/// Describes a single tab entry: the widget to show and its nav bar item.
+/// [minTier] controls when the tab becomes visible:
+///   1 = always (Regulate, Attune)
+///   2 = after consistent Regulate practice
+///   3 = after demonstrated journaling / WoT engagement
+class _Tab {
+  final Widget screen;
+  final IconData icon;
+  final String label;
+  final int minTier;
+
+  const _Tab({
+    required this.screen,
+    required this.icon,
+    required this.label,
+    required this.minTier,
+  });
+}
+
+const _allTabs = [
+  _Tab(
+    screen: RegulateHomeScreen(),
+    icon: Icons.waves_rounded,
+    label: 'Regulate',
+    minTier: 1,
+  ),
+  _Tab(
+    screen: AttuneHomeScreen(),
+    icon: Icons.music_note_rounded,
+    label: 'Attune',
+    minTier: 1,
+  ),
+  _Tab(
+    screen: MonitorHomeScreen(),
+    icon: Icons.favorite_border_rounded,
+    label: 'Monitor',
+    minTier: 2,
+  ),
+  _Tab(
+    screen: BuildHomeScreen(),
+    icon: Icons.eco_rounded,
+    label: 'Build',
+    minTier: 2,
+  ),
+  _Tab(
+    screen: ReflectHomeScreen(),
+    icon: Icons.auto_stories_rounded,
+    label: 'Reflect',
+    minTier: 2,
+  ),
+  _Tab(
+    screen: ProcessHomeScreen(),
+    icon: Icons.swap_horiz_rounded,
+    label: 'Process',
+    minTier: 3,
+  ),
+];
 
 class MainShell extends StatefulWidget {
   final VoidCallback onResetOnboarding;
@@ -23,7 +82,8 @@ class MainShell extends StatefulWidget {
   /// Switches to the Regulate tab from anywhere.
   /// Called after the panic sequence completes to land on Regulate tools.
   static void emergencyJumpToRegulate(BuildContext context) {
-    Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+    Navigator.of(context, rootNavigator: true)
+        .popUntil((route) => route.isFirst);
     _MainShellState._current?.jumpToRegulate();
   }
 }
@@ -58,68 +118,70 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  static const _screens = [
-    RegulateHomeScreen(),
-    ProcessHomeScreen(),
-    AttuneHomeScreen(),
-    MonitorHomeScreen(),
-    BuildHomeScreen(),
-    ReflectHomeScreen(),
-  ];
-
-  static const _navItems = [
-    _NavItem(icon: Icons.waves_rounded, label: 'Regulate'),
-    _NavItem(icon: Icons.swap_horiz_rounded, label: 'Process'),
-    _NavItem(icon: Icons.music_note_rounded, label: 'Attune'),
-    _NavItem(icon: Icons.favorite_border_rounded, label: 'Monitor'),
-    _NavItem(icon: Icons.eco_rounded, label: 'Build'),
-    _NavItem(icon: Icons.auto_stories_rounded, label: 'Reflect'),
-  ];
+  List<_Tab> _visibleTabs(TierStatus tier) {
+    final maxTier = tier.tier3
+        ? 3
+        : tier.tier2
+            ? 2
+            : 1;
+    return _allTabs.where((t) => t.minTier <= maxTier).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          IndexedStack(index: _index, children: _screens),
-          // Settings button — top right, always accessible
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            right: 16,
-            child: IconButton(
-              icon: const Icon(Icons.settings_rounded),
-              color: AppColors.textMuted,
-              iconSize: 22,
-              tooltip: 'Settings',
-              onPressed: _openSettings,
-            ),
+    return ValueListenableBuilder<TierStatus>(
+      valueListenable: TierService.notifier,
+      builder: (context, tier, _) {
+        final tabs = _visibleTabs(tier);
+        // Clamp index so it never goes out of range when tabs count changes
+        final safeIndex = _index.clamp(0, tabs.length - 1);
+        if (safeIndex != _index) {
+          // Use post-frame callback to avoid setState during build
+          WidgetsBinding.instance
+              .addPostFrameCallback((_) => setState(() => _index = safeIndex));
+        }
+
+        return Scaffold(
+          body: Stack(
+            children: [
+              IndexedStack(
+                index: safeIndex,
+                children: tabs.map((t) => t.screen).toList(),
+              ),
+              // Settings button — top right, always accessible
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 8,
+                right: 16,
+                child: IconButton(
+                  icon: const Icon(Icons.settings_rounded),
+                  color: AppColors.textMuted,
+                  iconSize: 22,
+                  tooltip: 'Settings',
+                  onPressed: _openSettings,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: const EmergencyButton(),
-      bottomNavigationBar: _ThriveNavBar(
-        currentIndex: _index,
-        items: _navItems,
-        onTap: (i) => setState(() => _index = i),
-      ),
+          floatingActionButton: const EmergencyButton(),
+          bottomNavigationBar: _ThriveNavBar(
+            currentIndex: safeIndex,
+            tabs: tabs,
+            onTap: (i) => setState(() => _index = i),
+          ),
+        );
+      },
     );
   }
 }
 
-class _NavItem {
-  final IconData icon;
-  final String label;
-  const _NavItem({required this.icon, required this.label});
-}
-
 class _ThriveNavBar extends StatelessWidget {
   final int currentIndex;
-  final List<_NavItem> items;
+  final List<_Tab> tabs;
   final ValueChanged<int> onTap;
 
   const _ThriveNavBar({
     required this.currentIndex,
-    required this.items,
+    required this.tabs,
     required this.onTap,
   });
 
@@ -138,7 +200,7 @@ class _ThriveNavBar extends StatelessWidget {
           height: 64,
           child: Row(
             children: [
-              for (int i = 0; i < items.length; i++)
+              for (int i = 0; i < tabs.length; i++)
                 Expanded(
                   child: GestureDetector(
                     onTap: () => onTap(i),
@@ -147,7 +209,7 @@ class _ThriveNavBar extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          items[i].icon,
+                          tabs[i].icon,
                           color: currentIndex == i
                               ? AppColors.teal
                               : AppColors.textMuted,
@@ -155,7 +217,7 @@ class _ThriveNavBar extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          items[i].label,
+                          tabs[i].label,
                           style: TextStyle(
                             color: currentIndex == i
                                 ? AppColors.teal

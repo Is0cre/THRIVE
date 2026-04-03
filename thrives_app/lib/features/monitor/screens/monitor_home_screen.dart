@@ -3,6 +3,7 @@ import '../../../core/models/tolerance_state.dart';
 import '../../../core/state/wot_scope.dart';
 import '../../../core/storage/prefs_service.dart';
 import '../../../core/storage/session_log.dart';
+import '../../../core/storage/tier_service.dart';
 import '../../../core/theme/app_theme.dart';
 
 class MonitorHomeScreen extends StatefulWidget {
@@ -41,6 +42,7 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
     await PrefsService.saveWotState(state);
     final entry = ToleranceEntry(state: state.name, timestamp: DateTime.now());
     await SessionLog.logTolerance(entry);
+    TierService.recheck(); // fire-and-forget — WoT check-ins count toward tier unlock
     if (mounted) {
       setState(() {
         _toleranceHistory = [entry, ..._toleranceHistory];

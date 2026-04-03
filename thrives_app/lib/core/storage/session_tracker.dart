@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'session_log.dart';
+import 'tier_service.dart';
 
 /// Mixin that adds automatic session logging to any tool screen's State.
 ///
@@ -56,6 +57,6 @@ mixin SessionTracking<T extends StatefulWidget> on State<T> {
       category: category ?? 'General',
       timestamp: start,
       durationSeconds: secs,
-    ));
+    )).then((_) => TierService.recheck());
   }
 }

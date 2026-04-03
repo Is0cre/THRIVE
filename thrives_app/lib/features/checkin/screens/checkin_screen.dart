@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/tolerance_state.dart';
 import '../../../core/storage/prefs_service.dart';
 import '../../../core/storage/session_log.dart';
+import '../../../core/storage/tier_service.dart';
 import '../../../core/theme/app_theme.dart';
 
 // CLINICAL SAFETY — Window of Tolerance check-in
@@ -40,6 +41,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
       state: _selected!.name,
       timestamp: DateTime.now(),
     ));
+    TierService.recheck(); // fire-and-forget
 
     widget.onComplete(_selected!);
   }

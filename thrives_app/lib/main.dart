@@ -4,6 +4,7 @@ import 'core/models/tolerance_state.dart';
 import 'core/state/wot_scope.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/prefs_service.dart';
+import 'core/storage/tier_service.dart';
 import 'core/widgets/main_shell.dart';
 import 'features/checkin/screens/checkin_screen.dart';
 import 'features/onboarding/screens/onboarding_screen.dart';
@@ -22,6 +23,7 @@ void main() async {
   ));
   final onboardingDone = await PrefsService.isOnboardingDone();
   final savedWot = await PrefsService.loadTodaysWotState();
+  await TierService.init();
   runApp(ThrivesApp(onboardingDone: onboardingDone, initialWot: savedWot));
 }
 
