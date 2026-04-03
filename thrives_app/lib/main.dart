@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/models/tolerance_state.dart';
 import 'core/state/wot_scope.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/prefs_service.dart';
+import 'core/ai/companion_service.dart';
 import 'core/storage/tier_service.dart';
 import 'core/widgets/main_shell.dart';
 import 'features/checkin/screens/checkin_screen.dart';
@@ -24,6 +26,9 @@ void main() async {
   final onboardingDone = await PrefsService.isOnboardingDone();
   final savedWot = await PrefsService.loadTodaysWotState();
   await TierService.init();
+  // Initialise companion service — checks if model is already installed.
+  // Fire-and-forget; the UI reacts to CompanionService.stateStream.
+  unawaited(CompanionService.instance.init());
   runApp(ThrivesApp(onboardingDone: onboardingDone, initialWot: savedWot));
 }
 
