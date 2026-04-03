@@ -1,65 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import '../../../core/audio/noise_generator.dart';
 import '../../../core/audio/tone_generator.dart';
 import '../../../core/storage/session_tracker.dart';
 import '../../../core/theme/app_theme.dart';
 
 enum AttuneMode { none, binaural, isochronic }
 
-class _NatureSound {
-  final String id;
-  final String label;
-  final IconData icon;
-  // Asset path — add mp3/ogg files to assets/audio/nature/ to enable
-  final String assetPath;
-
-  const _NatureSound({
-    required this.id,
-    required this.label,
-    required this.icon,
-    required this.assetPath,
-  });
-}
-
-const _natureSounds = [
-  _NatureSound(
-    id: 'rain',
-    label: 'Rain',
-    icon: Icons.grain_rounded,
-    assetPath: 'assets/audio/nature/rain.mp3',
-  ),
-  _NatureSound(
-    id: 'ocean',
-    label: 'Ocean',
-    icon: Icons.waves_rounded,
-    assetPath: 'assets/audio/nature/ocean.mp3',
-  ),
-  _NatureSound(
-    id: 'forest',
-    label: 'Forest',
-    icon: Icons.forest_rounded,
-    assetPath: 'assets/audio/nature/forest.mp3',
-  ),
-  _NatureSound(
-    id: 'river',
-    label: 'River',
-    icon: Icons.water_rounded,
-    assetPath: 'assets/audio/nature/river.mp3',
-  ),
-  _NatureSound(
-    id: 'thunder',
-    label: 'Thunder',
-    icon: Icons.thunderstorm_rounded,
-    assetPath: 'assets/audio/nature/thunder.mp3',
-  ),
-  _NatureSound(
-    id: 'wind',
-    label: 'Wind',
-    icon: Icons.air_rounded,
-    assetPath: 'assets/audio/nature/wind.mp3',
-  ),
-];
+const _noiseIcons = {
+  NatureNoiseType.rain: Icons.grain_rounded,
+  NatureNoiseType.ocean: Icons.waves_rounded,
+  NatureNoiseType.forest: Icons.forest_rounded,
+  NatureNoiseType.river: Icons.water_rounded,
+  NatureNoiseType.thunder: Icons.thunderstorm_rounded,
+  NatureNoiseType.wind: Icons.air_rounded,
+};
 
 class AttuneHomeScreen extends StatefulWidget {
   const AttuneHomeScreen({super.key});
@@ -79,10 +35,8 @@ class _AttuneHomeScreenState extends State<AttuneHomeScreen>
   String? _toneError;
 
   // ── nature sounds ─────────────────────────────────────────────────────────
-  final Set<String> _activeSounds = {};
-  final Map<String, AudioPlayer> _naturePlayers = {};
-  // Tracks which nature assets are actually present
-  final Set<String> _availableSounds = {};
+  final Set<NatureNoiseType> _activeSounds = {};
+  final Map<NatureNoiseType, AudioPlayer> _naturePlayers = {};
 
   // ── audio players ─────────────────────────────────────────────────────────
   final AudioPlayer _tonePlayer = AudioPlayer();
@@ -90,7 +44,6 @@ class _AttuneHomeScreenState extends State<AttuneHomeScreen>
   @override
   void initState() {
     super.initState();
-    _checkAvailableSounds();
   }
 
   @override
@@ -100,14 +53,6 @@ class _AttuneHomeScreenState extends State<AttuneHomeScreen>
       p.dispose();
     }
     super.dispose();
-  }
-
-  Future<void> _checkAvailableSounds() async {
-    // Nature sounds require bundled audio files.
-    // Add them to assets/audio/nature/ and declare in pubspec.yaml.
-    // For now all show as unavailable until files are present.
-    // When files are added, remove this stub and just attempt playback.
-    if (mounted) setState(() => _availableSounds.clear());
   }
 
   // ── tone playback ──────────────────────────────────────────────────────────
@@ -167,31 +112,22 @@ class _AttuneHomeScreenState extends State<AttuneHomeScreen>
 
   // ── nature playback ────────────────────────────────────────────────────────
 
-  Future<void> _toggleNature(String id, String assetPath) async {
-    if (_activeSounds.contains(id)) {
-      await _naturePlayers[id]?.stop();
-      _naturePlayers[id]?.dispose();
-      _naturePlayers.remove(id);
-      if (mounted) setState(() => _activeSounds.remove(id));
+  Future<void> _toggleNature(NatureNoiseType type) async {
+    if (_activeSounds.contains(type)) {
+      await _naturePlayers[type]?.stop();
+      _naturePlayers[type]?.dispose();
+      _naturePlayers.remove(type);
+      if (mounted) setState(() => _activeSounds.remove(type));
     } else {
       final player = AudioPlayer();
       try {
-        await player.setAsset(assetPath);
+        await player.setAudioSource(NatureNoiseSource(type), preload: true);
         await player.setLoopMode(LoopMode.one);
         await player.play();
-        _naturePlayers[id] = player;
-        if (mounted) setState(() => _activeSounds.add(id));
+        _naturePlayers[type] = player;
+        if (mounted) setState(() => _activeSounds.add(type));
       } catch (_) {
         player.dispose();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Audio file not found: $assetPath'),
-              backgroundColor: AppColors.surface,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
       }
     }
   }
@@ -372,17 +308,9 @@ class _AttuneHomeScreenState extends State<AttuneHomeScreen>
                         color: AppColors.textMuted, fontSize: 12, height: 1.4),
                   ),
                   const SizedBox(height: 12),
-                  _NatureSoundGrid(
-                    sounds: _natureSounds,
+                  _NoiseSoundGrid(
                     active: _activeSounds,
-                    available: _availableSounds,
                     onTap: _toggleNature,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Nature sound files can be added to assets/audio/nature/ — '
-                    'see the project README.',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: 11),
                   ),
                 ]),
               ),
@@ -553,18 +481,11 @@ class _BandGrid extends StatelessWidget {
   }
 }
 
-class _NatureSoundGrid extends StatelessWidget {
-  final List<_NatureSound> sounds;
-  final Set<String> active;
-  final Set<String> available;
-  final void Function(String id, String assetPath) onTap;
+class _NoiseSoundGrid extends StatelessWidget {
+  final Set<NatureNoiseType> active;
+  final void Function(NatureNoiseType type) onTap;
 
-  const _NatureSoundGrid({
-    required this.sounds,
-    required this.active,
-    required this.available,
-    required this.onTap,
-  });
+  const _NoiseSoundGrid({required this.active, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -575,11 +496,10 @@ class _NatureSoundGrid extends StatelessWidget {
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
       childAspectRatio: 1.2,
-      children: sounds.map((s) {
-        final isActive = active.contains(s.id);
-        final isAvailable = available.contains(s.id);
+      children: NatureNoiseType.values.map((type) {
+        final isActive = active.contains(type);
         return GestureDetector(
-          onTap: () => onTap(s.id, s.assetPath),
+          onTap: () => onTap(type),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
@@ -595,34 +515,21 @@ class _NatureSoundGrid extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  s.icon,
-                  color: isActive
-                      ? AppColors.teal
-                      : (isAvailable
-                          ? AppColors.textSecondary
-                          : AppColors.textMuted),
+                  _noiseIcons[type]!,
+                  color: isActive ? AppColors.teal : AppColors.textSecondary,
                   size: 24,
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  s.label,
+                  type.label,
                   style: TextStyle(
-                    color: isActive
-                        ? AppColors.teal
-                        : (isAvailable
-                            ? AppColors.textSecondary
-                            : AppColors.textMuted),
+                    color:
+                        isActive ? AppColors.teal : AppColors.textSecondary,
                     fontSize: 11,
                     fontWeight:
                         isActive ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
-                if (!isAvailable)
-                  const Text(
-                    'file needed',
-                    style: TextStyle(
-                        color: AppColors.textMuted, fontSize: 9),
-                  ),
               ],
             ),
           ),
