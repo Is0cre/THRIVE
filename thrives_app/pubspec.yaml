@@ -13,6 +13,7 @@ dependencies:
   flutter_animate: ^4.5.2
   shared_preferences: ^2.3.3
   vibration: ^2.0.0
+  wakelock_plus: ^1.2.10
 
 dev_dependencies:
   flutter_test:

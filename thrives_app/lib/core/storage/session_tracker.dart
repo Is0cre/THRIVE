@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'session_log.dart';
 import 'tier_service.dart';
 
@@ -24,10 +25,12 @@ mixin SessionTracking<T extends StatefulWidget> on State<T> {
 
   /// Call when the user actively starts using a tool.
   /// Safe to call multiple times — restarts the timer.
+  /// Enables WakeLock so the screen stays on during active sessions.
   void beginTracking(String tool, String category) {
     _trackTool = tool;
     _trackCategory = category;
     _trackStart = DateTime.now();
+    WakelockPlus.enable();
   }
 
   /// Flush without waiting for dispose — call when a session ends cleanly
@@ -49,6 +52,7 @@ mixin SessionTracking<T extends StatefulWidget> on State<T> {
     if (tool == null || start == null) return;
     _trackTool = null;
     _trackStart = null;
+    WakelockPlus.disable(); // release screen lock when tool session ends
     final secs = DateTime.now().difference(start).inSeconds;
     if (secs < 10) return;
     // Fire and forget — local write, completes in <1ms
