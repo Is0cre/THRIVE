@@ -1,0 +1,56 @@
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+
+Copyright (C) 2026 THRIVES Contributors
+
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+
+                            PREAMBLE
+
+The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+When we speak of free software, we are talking about freedom, not
+price. Our General Public Licenses are designed to make sure that you
+have the freedom to share and change all versions of a program--to
+make sure it remains free software for all its users.
+
+When you convey a copy of such a program, whether gratis or for a fee,
+you must pass on to the same freedoms to the recipients. You must make
+sure that they, too, receive or can get the source code. And you must
+show them these terms so they know their rights.
+
+Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+For the full license text see: https://www.gnu.org/licenses/gpl-3.0.txt
+
+---
+
+ADDITIONAL TERMS — PROHIBITED USES
+
+The following uses are explicitly prohibited regardless of any other
+provision of this licence:
+
+1. Military use. Use of this software, or any derivative work, by any
+   military organisation, armed force, defence contractor, or any entity
+   whose primary purpose includes armed conflict or weapons development,
+   of any nation.
+
+2. Intelligence and surveillance use. Use of this software, or any
+   derivative work, by any intelligence agency, signals intelligence
+   organisation, state surveillance apparatus, law enforcement agency
+   conducting mass surveillance, or any entity whose primary purpose
+   includes the covert collection, analysis, or exploitation of personal
+   data without the explicit, informed, and ongoing consent of the
+   individuals concerned.
+
+3. This prohibition applies equally to all nations, governments, and
+   non-state actors without exception.
+
+Rationale: THRIVES exists to support people processing trauma. That
+data must not become an instrument of surveillance, warfare, or
+coercion. This clause exists to make that impossible, not merely
+against policy.
